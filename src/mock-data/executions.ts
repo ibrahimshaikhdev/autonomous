@@ -1,0 +1,78 @@
+import { Execution } from "@/types";
+
+export const executions: Execution[] = [
+  {
+    id: "exec-001",
+    workflowId: "wf-001",
+    workflowName: "Lead Qualification Pipeline",
+    status: "success",
+    startedAt: "2024-01-20T14:30:00Z",
+    completedAt: "2024-01-20T14:30:45Z",
+    duration: 45,
+    logs: [
+      { timestamp: "14:30:00", node: "Trigger", message: "Received new lead from web form", level: "info" },
+      { timestamp: "14:30:02", node: "AI Classifier", message: "Lead scored: 85/100 (Hot)", level: "success" },
+      { timestamp: "14:30:05", node: "Condition", message: "Score > 70, routing to sales", level: "info" },
+      { timestamp: "14:30:10", node: "CRM Save", message: "Lead saved to Salesforce", level: "success" },
+      { timestamp: "14:30:15", node: "Slack Notify", message: "Notification sent to #leads channel", level: "success" },
+      { timestamp: "14:30:45", node: "Complete", message: "Workflow completed successfully", level: "success" },
+    ],
+  },
+  {
+    id: "exec-002",
+    workflowId: "wf-002",
+    workflowName: "Customer Onboarding Flow",
+    status: "success",
+    startedAt: "2024-01-20T10:15:00Z",
+    completedAt: "2024-01-20T10:15:32Z",
+    duration: 32,
+    logs: [
+      { timestamp: "10:15:00", node: "Trigger", message: "New customer signup detected", level: "info" },
+      { timestamp: "10:15:03", node: "Email Welcome", message: "Welcome email sent", level: "success" },
+      { timestamp: "10:15:10", node: "Create Tasks", message: "Onboarding tasks created in Asana", level: "success" },
+      { timestamp: "10:15:32", node: "Complete", message: "Workflow completed successfully", level: "success" },
+    ],
+  },
+  {
+    id: "exec-003",
+    workflowId: "wf-004",
+    workflowName: "Invoice Generation",
+    status: "failed",
+    startedAt: "2024-01-20T09:00:00Z",
+    completedAt: "2024-01-20T09:00:15Z",
+    duration: 15,
+    logs: [
+      { timestamp: "09:00:00", node: "Trigger", message: "Monthly invoice generation triggered", level: "info" },
+      { timestamp: "09:00:05", node: "Fetch Data", message: "Retrieved usage data from database", level: "info" },
+      { timestamp: "09:00:10", node: "Generate PDF", message: "Failed to generate PDF: Template not found", level: "error" },
+      { timestamp: "09:00:15", node: "Complete", message: "Workflow failed", level: "error" },
+    ],
+  },
+  {
+    id: "exec-004",
+    workflowId: "wf-006",
+    workflowName: "Data Sync Pipeline",
+    status: "success",
+    startedAt: "2024-01-20T13:45:00Z",
+    completedAt: "2024-01-20T13:45:22Z",
+    duration: 22,
+    logs: [
+      { timestamp: "13:45:00", node: "Trigger", message: "Scheduled sync triggered", level: "info" },
+      { timestamp: "13:45:05", node: "Extract", message: "Extracted 1,234 records from CRM", level: "info" },
+      { timestamp: "13:45:12", node: "Transform", message: "Data transformed successfully", level: "success" },
+      { timestamp: "13:45:18", node: "Load", message: "Loaded 1,234 records to external system", level: "success" },
+      { timestamp: "13:45:22", node: "Complete", message: "Sync completed successfully", level: "success" },
+    ],
+  },
+  {
+    id: "exec-005",
+    workflowId: "wf-001",
+    workflowName: "Lead Qualification Pipeline",
+    status: "running",
+    startedAt: "2024-01-20T15:00:00Z",
+    logs: [
+      { timestamp: "15:00:00", node: "Trigger", message: "Received new lead from web form", level: "info" },
+      { timestamp: "15:00:02", node: "AI Classifier", message: "Processing lead with AI...", level: "info" },
+    ],
+  },
+];

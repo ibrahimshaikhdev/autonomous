@@ -1,12 +1,24 @@
 export interface Workflow {
   id: string;
   name: string;
-  description: string;
-  status: "active" | "inactive" | "draft";
+  description: string | null;
+  nodes: WorkflowNode[];
+  edges: WorkflowEdge[];
+  isPublic: boolean;
+  workspaceId: string;
+  userId: string;
   createdAt: string;
   updatedAt: string;
-  executions: number;
-  lastRun?: string;
+}
+
+export interface WorkflowSummary {
+  id: string;
+  name: string;
+  description: string | null;
+  isPublic: boolean;
+  nodeCount: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Execution {
@@ -46,6 +58,8 @@ export interface WorkflowEdge {
   id: string;
   source: string;
   target: string;
+  sourceHandle?: string | null;
+  targetHandle?: string | null;
 }
 
 export interface WorkflowData {

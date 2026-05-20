@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 const nodes = [
@@ -67,14 +68,18 @@ export function Showcase() {
           </div>
 
           <div className="mt-6 flex justify-end">
-            <Button size="sm">View Workflow</Button>
+            <Link href="/workflows/builder">
+              <Button size="sm">View Workflow</Button>
+            </Link>
           </div>
         </div>
 
         <div className="mt-12 text-center">
-          <Button variant="outline" size="lg">
-            Explore More Workflows
-          </Button>
+          <Link href="/dashboard">
+            <Button variant="outline" size="lg">
+              Explore More Workflows
+            </Button>
+          </Link>
         </div>
       </div>
     </section>

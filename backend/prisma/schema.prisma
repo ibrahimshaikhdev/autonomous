@@ -14,16 +14,18 @@ enum UserRole {
 }
 
 model User {
-  id          String     @id @default(uuid())
-  email       String     @unique
-  password    String
-  name        String?
-  role        UserRole   @default(MEMBER)
-  workspaceId String?
-  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
-  workflows   Workflow[] // Added for Phase 3
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id                   String     @id @default(uuid())
+  email                String     @unique
+  password             String
+  name                 String?
+  role                 UserRole   @default(MEMBER)
+  workspaceId          String?
+  workspace            Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  workflows            Workflow[] // Added for Phase 3
+  passwordOtp          String?
+  passwordOtpExpires   DateTime?
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
 
   @@map("users")
 }

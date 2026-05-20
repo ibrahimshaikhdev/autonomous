@@ -26,7 +26,7 @@ export function Hero() {
           </p>
 
           <div className="mt-10 flex items-center justify-center gap-4">
-            <Link href="/dashboard">
+            <Link href="/signup">
               <Button size="lg" className="px-8">
                 Start Building Free
               </Button>

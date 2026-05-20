@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 const plans = [
@@ -14,6 +15,7 @@ const plans = [
       "Community support",
     ],
     cta: "Get Started Free",
+    href: "/signup",
   },
   {
     name: "Pro",
@@ -28,6 +30,7 @@ const plans = [
       "AI agents included",
     ],
     cta: "Start Free Trial",
+    href: "/signup",
     popular: true,
   },
   {
@@ -43,6 +46,7 @@ const plans = [
       "On-premise deployment",
     ],
     cta: "Contact Sales",
+    href: "mailto:sales@autonomousops.ai",
   },
 ];
 
@@ -100,9 +104,19 @@ export function Pricing() {
                 ))}
               </ul>
 
-              <Button className="w-full" variant={plan.popular ? "default" : "outline"}>
-                {plan.cta}
-              </Button>
+              {plan.href.startsWith("mailto:") ? (
+                <a href={plan.href}>
+                  <Button className="w-full" variant={plan.popular ? "default" : "outline"}>
+                    {plan.cta}
+                  </Button>
+                </a>
+              ) : (
+                <Link href={plan.href}>
+                  <Button className="w-full" variant={plan.popular ? "default" : "outline"}>
+                    {plan.cta}
+                  </Button>
+                </Link>
+              )}
             </div>
           ))}
         </div>

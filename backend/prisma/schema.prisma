@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model User {
+  id          String     @id @default(uuid())
+  email       String     @unique
+  password    String
+  name        String?
+  role        UserRole   @default(MEMBER)
+  workspaceId String?
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  workflows   Workflow[] // Added for Phase 3
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("users")
+}
+
+model Workspace {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  users     User[]
+  workflows Workflow[] // Added for Phase 3
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("workspaces")
+}
+
+model Workflow {
+  id          String     @id @default(uuid())
+  name        String
+  description String?
+  nodes       Json // Stores React Flow nodes
+  edges       Json // Stores React Flow edges
+  isPublic    Boolean    @default(false)
+  workspaceId String
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id])
+  userId      String
+  user        User       @relation(fields: [userId], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("workflows")
+}

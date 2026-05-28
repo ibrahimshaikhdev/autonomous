@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, ForbiddenException } from "@nestjs/common";
+import { randomUUID } from "crypto";
 import { PrismaService } from "../../prisma/prisma.service";
 import { CreateWorkflowDto } from "./dto/create-workflow.dto";
 import { UpdateWorkflowDto } from "./dto/update-workflow.dto";
@@ -16,19 +17,32 @@ export class WorkflowsService {
     }
   }
 
+  /** Check if nodes contain a webhook trigger node */
+  private hasWebhookTrigger(nodes: any): boolean {
+    const parsed = typeof nodes === "string" ? JSON.parse(nodes) : nodes;
+    if (!Array.isArray(parsed)) return false;
+    return parsed.some((n: any) => n.type === "webhook" || n.data?.nodeType === "webhook");
+  }
+
   async create(
     userId: string,
     workspaceId: string,
     createWorkflowDto: CreateWorkflowDto,
   ) {
     await this.validateWorkspaceMembership(userId, workspaceId);
-    return this.prisma.workflow.create({
-      data: {
-        ...createWorkflowDto,
-        user: { connect: { id: userId } },
-        workspace: { connect: { id: workspaceId } },
-      },
-    });
+
+    const data: any = {
+      ...createWorkflowDto,
+      user: { connect: { id: userId } },
+      workspace: { connect: { id: workspaceId } },
+    };
+
+    // Auto-generate webhookId if workflow contains a webhook trigger node
+    if (this.hasWebhookTrigger(createWorkflowDto.nodes)) {
+      data.webhookId = `wh_${randomUUID().replace(/-/g, "").slice(0, 16)}`;
+    }
+
+    return this.prisma.workflow.create({ data });
   }
 
   async findAll(workspaceId: string, userId: string) {
@@ -63,9 +77,17 @@ export class WorkflowsService {
     if (!workflow) {
       throw new NotFoundException(`Workflow with ID ${id} not found`);
     }
+
+    const data: any = { ...updateWorkflowDto };
+
+    // Auto-generate webhookId if nodes were updated and now contain a webhook trigger
+    if (updateWorkflowDto.nodes && this.hasWebhookTrigger(updateWorkflowDto.nodes) && !workflow.webhookId) {
+      data.webhookId = `wh_${randomUUID().replace(/-/g, "").slice(0, 16)}`;
+    }
+
     return this.prisma.workflow.update({
       where: { id },
-      data: updateWorkflowDto,
+      data,
     });
   }
 
@@ -95,16 +117,21 @@ export class WorkflowsService {
 
     const newWorkflowName = `${workflowToDuplicate.name} (Copy)`;
 
-    return this.prisma.workflow.create({
-      data: {
-        name: newWorkflowName,
-        description: workflowToDuplicate.description,
-        nodes: workflowToDuplicate.nodes as any,
-        edges: workflowToDuplicate.edges as any,
-        isPublic: workflowToDuplicate.isPublic,
-        user: { connect: { id: userId } },
-        workspace: { connect: { id: workspaceId } },
-      },
-    });
+    const data: any = {
+      name: newWorkflowName,
+      description: workflowToDuplicate.description,
+      nodes: workflowToDuplicate.nodes as any,
+      edges: workflowToDuplicate.edges as any,
+      isPublic: workflowToDuplicate.isPublic,
+      user: { connect: { id: userId } },
+      workspace: { connect: { id: workspaceId } },
+    };
+
+    // Generate a fresh webhookId if the original had one
+    if (workflowToDuplicate.webhookId) {
+      data.webhookId = `wh_${randomUUID().replace(/-/g, "").slice(0, 16)}`;
+    }
+
+    return this.prisma.workflow.create({ data });
   }
 }

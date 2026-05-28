@@ -152,6 +152,38 @@ export const api = {
       });
     },
   },
+
+  // Execution endpoints
+  executions: {
+    execute: async (workspaceId: string, workflowId: string, triggerData?: any) => {
+      return fetchApi<any>(`/workspaces/${workspaceId}/executions`, {
+        method: 'POST',
+        body: JSON.stringify({ workflowId, triggerData }),
+      });
+    },
+
+    getAll: async (workspaceId: string, workflowId?: string, status?: string) => {
+      const params = new URLSearchParams();
+      if (workflowId) params.set('workflowId', workflowId);
+      if (status) params.set('status', status);
+      const query = params.toString() ? `?${params.toString()}` : '';
+      return fetchApi<any[]>(`/workspaces/${workspaceId}/executions${query}`);
+    },
+
+    getById: async (workspaceId: string, executionId: string) => {
+      return fetchApi<any>(`/workspaces/${workspaceId}/executions/${executionId}`);
+    },
+
+    retry: async (workspaceId: string, executionId: string) => {
+      return fetchApi<any>(`/workspaces/${workspaceId}/executions/${executionId}/retry`, {
+        method: 'POST',
+      });
+    },
+
+    getStats: async (workspaceId: string) => {
+      return fetchApi<{ total: number; today: number; successRate: number }>(`/workspaces/${workspaceId}/executions/stats`);
+    },
+  },
 };
 
 // Helper to save token

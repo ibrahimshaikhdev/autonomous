@@ -1,6 +1,6 @@
-# AutonomousOps AI — Project Context
+# AutonomousOps AI — Updated Project Context
 
-## Project Goal
+## Project Overview
 
 AutonomousOps AI is an AI-native workflow automation platform inspired by:
 
@@ -9,49 +9,32 @@ AutonomousOps AI is an AI-native workflow automation platform inspired by:
 - Retool
 - AI operational systems
 
-The platform allows users to visually create, manage, and execute automations using drag-and-drop workflows and AI-assisted workflow generation.
+The platform allows users to:
+
+- visually build workflows
+- configure automation nodes
+- execute workflows
+- integrate external services
+- manage automations through a scalable SaaS architecture
 
 Long-term vision:
-Create a scalable open-source SaaS platform that helps businesses automate operations using natural language and intelligent workflow orchestration.
-
-Example workflow:
-Gmail Trigger → AI Classification → Save to Google Sheets → Notify Discord → Generate Invoice
+Build an open-source AI workflow orchestration platform capable of AI-generated automations and intelligent operational workflows.
 
 ---
 
-# Main Objectives
+# Current Architecture Status
 
-The project aims to demonstrate:
+The project is already a functional full-stack SaaS application with:
 
-- scalable backend engineering
-- workflow execution systems
-- AI-assisted automation
-- SaaS architecture
-- system design
-- event-driven systems
-- modern frontend engineering
-- authentication & authorization
-- real-world integrations
-- open-source engineering practices
-
----
-
-# Long-Term Product Vision
-
-AutonomousOps AI should eventually support:
-
-- AI-generated workflows from plain English
-- drag-and-drop workflow builder
-- real-time workflow monitoring
-- workflow execution engine
-- workflow templates
-- self-healing workflows
-- reusable automation blocks
-- third-party integrations
-- collaborative workspaces
-- AI workflow debugging
-- workflow analytics
-- open-source plugin ecosystem
+- frontend
+- backend
+- database
+- authentication
+- workflow persistence
+- execution engine
+- configurable runtime nodes
+- draft autosave
+- OTP password reset system
 
 ---
 
@@ -60,6 +43,7 @@ AutonomousOps AI should eventually support:
 ## Frontend
 
 - Next.js 14
+- React 18
 - TypeScript
 - TailwindCSS
 - React Flow
@@ -76,81 +60,22 @@ AutonomousOps AI should eventually support:
 - MySQL
 - Prisma ORM
 
-## Future Infrastructure
+## Authentication & Security
 
-- Redis
-- Queue systems
-- WebSockets
-- AI APIs
-- Background workers
-- Docker
+- JWT authentication
+- Protected routes
+- Session persistence
+- User isolation/security
+- OTP password reset
+- Resend email API
 
----
+## Workflow Runtime
 
-# Development Philosophy
-
-IMPORTANT RULES:
-
-- Build incrementally
-- Avoid overengineering
-- Keep localhost stable
-- Use stable package versions only
-- Avoid premature scaling complexity
-- Focus on clean architecture
-- Build production-grade foundations
-- Build module-by-module
-- Test each phase before moving ahead
-
-IMPORTANT:
-Do NOT attempt enterprise-level infrastructure too early.
-
----
-
-# Current Stable Versions
-
-Use stable versions only:
-
-- Next.js 14
-- React 18
-- ESLint 8
-- Stable NestJS
-- Stable Prisma
-
-Avoid:
-
-- experimental releases
-- unstable packages
-- bleeding-edge dependencies
-
----
-
-# Project Architecture Direction
-
-Architecture should eventually support:
-
-- scalable workflow execution
-- modular integrations
-- async processing
-- event-driven systems
-- AI orchestration
-- multi-user SaaS
-- future scaling
-
-BUT:
-initial versions must remain simple and stable.
-
----
-
-# Development Workflow
-
-Before moving to next phase:
-
-- current phase must be stable
-- localhost must run correctly
-- no major frontend/backend bugs
-- no dependency chaos
-- no broken navigation
-- no dead UI components
+- Workflow execution engine
+- Sequential graph traversal
+- Configurable execution nodes
+- Runtime execution logs
+- Draft autosave using localStorage
 
 ---
 
@@ -163,348 +88,750 @@ Completed:
 - Landing page
 - Dashboard UI
 - Workflow builder UI
-- Workflow history page
-- Settings page
-- Sidebar navigation
-- Navbar
-- React Flow setup
+- React Flow integration
+- Routing
+- Responsive layout
 - Theme support
-- Responsive UI
-- Frontend routing
 - Frontend stabilization
-- UI interaction fixes
-
-Goal:
-Create polished SaaS-style frontend foundation.
 
 ---
 
-## Phase 2 — Backend + Authentication Foundation
+## Phase 2 — Backend + Authentication
 
 Completed:
 
-- NestJS backend setup
-- MySQL setup
-- Prisma integration
-- Environment configuration
-- Authentication module
+- NestJS backend
+- MySQL + Prisma
 - JWT authentication
-- Password hashing
-- User registration
-- User login
+- User registration/login
 - Protected routes
 - User management
-- Profile endpoints
-- Frontend-backend auth connection
-
-Goal:
-Create stable backend foundation with real authentication and database persistence.
+- Frontend/backend auth integration
 
 ---
 
-# Current Phase
+## Phase 3 — Workflow CRUD + Persistence
 
-## Current Phase — Phase 3: Workflow CRUD + Workflow Persistence
+Completed:
 
-Phase 3 is partially completed.
-
-The backend architecture and workflow persistence foundation are already implemented successfully.
-
-Current completed work:
-
-### Backend Completed
-
-- Workflow Prisma schema completed
-- Workflow model added in `schema.prisma`
-- MySQL workflow persistence working
-- Workflow CRUD APIs implemented
-- Create workflow endpoint
-- Get all workflows endpoint
-- Get workflow by ID endpoint
-- Update workflow endpoint
-- Delete workflow endpoint
-- Duplicate workflow endpoint
-- Workflow module integrated into NestJS backend
-- DTO validation implemented
-- Prisma migrations completed successfully
-- Backend running successfully on localhost:3001
-- TypeScript and Prisma issues resolved
-
-### Frontend Completed
-
-- React Flow workflow builder UI created
-- Dashboard UI completed
-- Workflow builder page completed
-- Workflow list page UI completed
-- Workflow detail page UI completed
-- Frontend routing completed
-- Frontend running successfully on localhost:3000
-
-### Authentication Completed
-
-- JWT authentication working
-- Protected routes working
-- User authentication integrated with workflow APIs
+- Workflow database schema
+- Workflow CRUD APIs
+- Workflow save/load/update/delete
+- Workflow duplication
+- React Flow persistence
+- Frontend/backend workflow integration
+- User-isolated workflows
+- Auth/session stabilization
+- Draft autosave
+- Real OTP password reset flow
+- Workflow security fixes
 
 ---
 
-# Remaining Work in Phase 3 (Phase 3B)
+## Phase 4A — Workflow Execution Engine
 
-The backend CRUD system exists, but the frontend is not fully connected to the backend yet.
+Completed:
 
-Current focus:
+- Workflow runtime engine
+- Sequential node execution
+- Graph traversal
+- Runtime execution flow
+- Execution logging
+- Error handling
+- Manual workflow execution
 
-- frontend ↔ backend workflow integration
-- connecting React Flow builder with APIs
-- workflow persistence from frontend
-- workflow loading into React Flow
-- workflow editing/updating from UI
-- workflow deletion from UI
-- workflow duplication from UI
-- proper frontend API service layer
-- loading states
-- frontend error handling
-- workflow state synchronization
+Supported runtime nodes:
 
----
-
-# Main Goal of Remaining Phase 3
-
-Transform the project from:
-
-- dashboard UI + backend APIs
-
-into:
-
-- fully connected real workflow management platform
-
-where users can:
-
-- create workflows
-- visually edit workflows
-- save workflows
-- reload workflows later
-- update workflows
-- delete workflows
-- duplicate workflows
-
-using the real React Flow builder connected to the backend database.
+- Manual Trigger
+- Delay Node
+- HTTP Request Node
+- Log Node
 
 ---
 
-# Important Engineering Rules
+## Phase 4B — Configurable Node System
 
-- Keep localhost stable
-- Avoid unnecessary rewrites
-- Do not overengineer
-- Do not introduce Redis/Kafka yet
-- Do not start execution engine yet
-- Focus ONLY on workflow management completion
-- Use existing backend architecture
-- Use existing frontend architecture
-- Build incrementally
+Completed:
 
----
-
-# Current Tech Stack
-
-Frontend:
-
-- Next.js 14
-- TypeScript
-- TailwindCSS
-- React Flow
-
-Backend:
-
-- NestJS
-- TypeScript
-
-Database:
-
-- MySQL
-- Prisma ORM
+- Dynamic node configuration
+- Config sidebar/panel
+- Runtime config persistence
+- Configurable HTTP requests
+- Configurable delay nodes
+- Configurable log nodes
+- Config persistence in workflow state
 
 ---
 
-# Current Priority
+# Completed Phase
 
-Complete Phase 3B:
-Frontend ↔ Backend workflow integration and persistence.
+## Phase 5A — Real Integrations MVP
 
-# Future Phases
+Current goal:
+Add real-world integrations into workflow runtime.
 
-## Phase 4 — Workflow Execution Engine
+Initial integrations planned:
 
-Planned:
+- Webhook Trigger Node
+- Discord Webhook Node
 
-- node execution engine
-- trigger system
-- action execution
-- workflow runtime
-- execution states
-- retry handling
-- execution logs
+Future integrations:
 
-Goal:
-Make workflows executable.
-
----
-
-## Phase 5 — Real Integrations
-
-Planned integrations:
-
+- Telegram Bot API
 - Gmail API
 - Google Sheets API
-- Discord API
-- Telegram Bot API
-- Slack API
 - GitHub API
 
-Goal:
-Enable real-world automation workflows.
-
 ---
 
-## Phase 6 — Real-Time Monitoring
+# Engineering Philosophy
 
-Planned:
+IMPORTANT RULES:
 
-- live workflow monitoring
-- WebSocket updates
-- execution dashboard
-- live logs
-- execution analytics
-
-Goal:
-Create real-time operational visibility.
-
----
-
-## Phase 7 — AI Workflow Generation
-
-Planned:
-
-- natural language workflows
-- AI-generated automation flows
-- AI node recommendations
-- workflow templates
-- workflow optimization suggestions
-
-Example:
-"Whenever a lead fills my form, send welcome email and notify sales team."
-
-Goal:
-AI-native workflow creation.
-
----
-
-## Phase 8 — AI Workflow Intelligence
-
-Planned:
-
-- self-healing workflows
-- AI debugging
-- execution failure analysis
-- intelligent retries
-- workflow optimization
-- automation memory
-
-Goal:
-Create intelligent automation system beyond traditional workflow tools.
-
----
-
-# Real Integrations Strategy
-
-Use real APIs with free tiers where possible.
-
-Primary integrations:
-
-- Gmail
-- Google Sheets
-- Discord
-- Telegram
-- Slack
-- GitHub
+- Build incrementally
+- Avoid overengineering
+- Keep localhost stable
+- Use stable package versions only
+- Preserve architecture stability
+- Fix bugs before adding complexity
+- Prefer modular scalable systems
 
 IMPORTANT:
-Prefer free-tier-friendly APIs during MVP stage.
+Do NOT introduce:
+
+- microservices
+- Kafka
+- distributed execution
+- enterprise scaling complexity
+
+until core architecture is fully stable.
 
 ---
 
-# Open Source Strategy
+# Current Product Capabilities
 
-Project will eventually become:
+The platform currently supports:
 
-- open source
-- publicly documented
-- built in public
-- feedback-driven
-- community-improved
-
-Goals:
-
-- attract contributors
-- improve engineering visibility
-- strengthen GitHub profile
-- showcase system design skills
-- attract recruiters/startup founders
+- visual workflow building
+- workflow persistence
+- configurable runtime nodes
+- workflow execution
+- authentication/security
+- autosave draft recovery
+- OTP-based password reset
+- runtime execution logs
 
 ---
 
-# Public Building Strategy
+# Completed Phase
 
-The project is being built publicly on:
+## Phase 5B
 
-- X/Twitter
-- LinkedIn
-- GitHub
-
-Positioning:
-Computer engineering student from India building an open-source AI workflow automation platform while learning scalable backend engineering and SaaS architecture.
-
----
-
-# Important Development Constraints
+PHASE 5B — SMART LEADOPS AUTOMATION SYSTEM
 
 IMPORTANT:
-Claude is being used through Minimax free version inside VS Code.
+Phase 5A integration foundation is completed.
 
-Constraints:
+Current platform already supports:
 
-- plain text responses only
-- no tool references
-- no artifacts
-- no unsupported formatting
+- workflow execution engine
+- configurable nodes
+- webhook triggers
+- external integrations
+- workflow persistence
+- auth/security
 
-AI instructions:
+Now build a focused business automation use case.
 
-- generate incrementally
-- avoid giant rewrites
-- avoid unnecessary refactors
-- explain root causes before fixes
-- prefer stable implementations
-- prioritize working localhost environment
+GOAL:
+Transform AutonomousOps AI from generic workflow tool into a business operations automation platform.
+
+Build:
+SMART LEAD QUALIFICATION + CRM AUTOMATION
+
+IMPORTANT:
+Do NOT overengineer.
+Do NOT add many unrelated integrations.
+Focus on solving one real business problem extremely well.
+
+MAIN BUSINESS PROBLEM:
+Small businesses lose leads because:
+
+- lead data is scattered
+- no qualification logic
+- no automatic categorization
+- poor lead visibility
+- manual CRM entry
+
+BUILD THESE NODES:
+
+1. Lead Intake Node
+   Receives lead submission data
+
+Fields:
+
+- name
+- email
+- company
+- source
+- message
+- budget
 
 ---
 
-# Core Engineering Goal
+2. Lead Scoring Node
 
-Build a project strong enough to demonstrate:
+Configurable scoring rules:
 
-- advanced software engineering
-- scalable system design
-- backend architecture
-- real-world SaaS engineering
-- automation systems thinking
-- AI-assisted operational tooling
+- budget thresholds
+- keyword detection
+- source weighting
+- priority classification
 
-This project should eventually serve as:
+Outputs:
 
-- flagship resume project
-- final year project
-- open-source SaaS
-- public engineering portfolio
-- long-term startup opportunity
+- hot lead
+- warm lead
+- cold lead
+
+---
+
+3. Google Sheets CRM Node
+
+Append structured lead rows into sheet
+
+Columns:
+
+- timestamp
+- name
+- company
+- score
+- priority
+- source
+- status
+
+---
+
+4. Notification Node
+
+Send internal alert when:
+
+- hot lead detected
+- high-value lead arrives
+
+---
+
+5. Lead Status Router
+
+Conditional routing:
+
+- hot leads → immediate alert
+- warm leads → CRM only
+- cold leads → archive
+
+EXECUTION REQUIREMENTS:
+
+- workflow runtime must process lead data dynamically
+- scoring should affect downstream routing
+- all node outputs should flow through execution graph
+
+FRONTEND REQUIREMENTS:
+
+- clean business-focused node config UI
+- lead scoring settings panel
+- workflow templates for lead automation
+
+IMPORTANT ENGINEERING RULES:
+
+- minimal stable implementation
+- preserve architecture
+- keep localhost stable
+- modular node design
+
+VERY IMPORTANT:
+Before generating code:
+
+1. Explain lead automation architecture
+2. Explain scoring/routing strategy
+3. Explain Google Sheets integration flow
+4. Explain execution graph behavior
+5. Then generate implementation incrementally
+
+# completed Phase -
+
+PHASE 6 — EXECUTION MONITORING & OBSERVABILITY
+
+IMPORTANT:
+Phase 5B is completed.
+
+Current platform already supports:
+
+- workflow execution engine
+- configurable runtime nodes
+- webhook triggers
+- external integrations
+- lead automation workflows
+- workflow persistence
+- auth/security
+
+Now build execution monitoring and observability.
+
+GOAL:
+Transform AutonomousOps AI into a production-grade observable automation platform.
+
+IMPORTANT:
+Do NOT rewrite execution engine.
+Do NOT add AI workflow generation yet.
+Do NOT overengineer.
+
+MAIN GOALS:
+
+1. Workflow execution history
+2. Detailed execution logs
+3. Run inspection
+4. Execution status visualization
+5. Retry failed executions
+
+BUILD:
+
+1. Execution History Dashboard
+
+Display:
+
+- workflow name
+- execution status
+- trigger source
+- duration
+- timestamp
+- success/failure
+
+---
+
+2. Execution Detail View
+
+Per execution:
+
+- node-by-node logs
+- execution timestamps
+- payload snapshots
+- outputs/errors
+- execution path
+
+---
+
+3. Visual Node Status Tracking
+
+Workflow graph should display:
+
+- success state
+- failed state
+- running state
+
+---
+
+4. Retry Execution
+
+Allow rerunning failed workflow executions.
+
+---
+
+5. Execution Persistence
+
+Store execution runs in database.
+
+Include:
+
+- workflowId
+- executionId
+- node results
+- runtime duration
+- status
+- trigger payload
+- error traces
+
+FRONTEND REQUIREMENTS:
+
+- execution monitoring dashboard
+- run detail modal/page
+- visual execution state rendering
+- clean observability UI
+
+BACKEND REQUIREMENTS:
+
+- execution run model
+- execution logging persistence
+- retrieval APIs
+- retry execution APIs
+
+IMPORTANT ENGINEERING RULES:
+
+- minimal stable implementation
+- preserve architecture
+- modular design
+- keep localhost stable
+
+VERY IMPORTANT:
+Before generating code:
+
+1. Explain execution observability architecture
+2. Explain database persistence design
+3. Explain frontend monitoring flow
+4. Explain node status tracking strategy
+5. Then generate implementation incrementally
+
+# completed phase--
+
+PHASE 7 — AI WORKFLOW GENERATION
+
+IMPORTANT:
+Phase 6 execution observability is completed.
+
+Current platform already supports:
+
+- workflow execution engine
+- configurable runtime nodes
+- webhook integrations
+- lead automation
+- execution monitoring
+- retry system
+- workflow persistence
+- auth/security
+
+Now begin:
+
+AI WORKFLOW GENERATION
+
+GOAL:
+Transform AutonomousOps AI into a true AI-native workflow automation platform.
+
+Allow users to generate workflows using natural language.
+
+IMPORTANT:
+Start simple.
+
+Do NOT build advanced LLM orchestration.
+Do NOT overengineer.
+Do NOT introduce multi-agent systems.
+
+Build a practical MVP.
+
+MAIN FEATURES:
+
+1. Natural Language Workflow Generator
+
+User enters prompt like:
+
+"When a lead submits a form, score it and save it to CRM"
+
+System generates workflow graph automatically.
+
+---
+
+2. Prompt-to-Node Mapping
+
+Convert prompts into:
+
+- nodes
+- edges
+- configurations
+
+using deterministic parsing / lightweight AI logic.
+
+---
+
+3. AI Workflow Suggestions
+
+Suggest:
+
+- missing nodes
+- recommended next steps
+- optimization hints
+
+---
+
+4. Workflow Template Intelligence
+
+Generate best-fit workflow templates from intent.
+
+---
+
+5. Frontend AI Builder UI
+
+Add:
+
+- prompt input box
+- generate workflow button
+- preview generated graph
+- allow editing after generation
+
+---
+
+BACKEND REQUIREMENTS
+
+Build:
+
+- AI generation module
+- prompt parsing service
+- workflow graph generator
+- template mapper
+
+---
+
+IMPORTANT ENGINEERING RULES
+
+- Minimal stable implementation
+- Preserve architecture
+- No giant rewrites
+- Keep localhost stable
+
+VERY IMPORTANT:
+
+Before generating code:
+
+1. Explain prompt-to-workflow architecture
+2. Explain node generation strategy
+3. Explain frontend AI generation flow
+4. Explain extensibility approach
+5. Then implement incrementally
+
+# some bugs in phase 7
+
+PHASE 7 FIXES — AI WORKFLOW GENERATION STABILIZATION
+
+IMPORTANT:
+Phase 7 exists partially but is NOT functioning correctly.
+
+Current issues:
+
+1. Prompt understanding is too strict
+
+Examples:
+
+- typing "sheets" fails
+- partial keywords fail
+- typo tolerance is poor
+
+The generator should handle:
+
+- partial matches
+- fuzzy matching
+- typo tolerance
+- semantic keyword mapping
+
+Examples that should work:
+
+- sheets
+- shets
+- google shhets
+- save to sheet
+
+---
+
+2. Generated workflow disappears after clicking "Use Workflow"
+
+Current broken behavior:
+
+- workflow generation appears
+- clicking "Use Workflow" causes blank builder
+- workflow only appears after saving
+
+Correct behavior:
+
+- generated workflow must immediately render on canvas
+- nodes + edges should appear instantly
+- user should edit before saving
+- save should persist existing visible graph
+
+---
+
+3. Execution incorrectly shows "Skipped"
+
+Current broken behavior:
+
+- all generated nodes show skipped
+
+Correct behavior:
+
+- trigger nodes should execute successfully
+- configured executable nodes should run
+- only invalid/unconfigured nodes should skip
+
+---
+
+FIX REQUIREMENTS:
+
+1. Improve prompt parsing
+   Implement:
+
+- fuzzy keyword matching
+- typo-tolerant parsing
+- synonym mapping
+
+2. Fix immediate canvas rendering
+   Ensure generated graph hydrates directly into React Flow state
+
+3. Fix execution status logic
+   Correct trigger/runtime execution labeling
+
+IMPORTANT:
+Do NOT rewrite AI workflow generation architecture.
+Do NOT replace with external LLM API yet.
+
+Keep current parser-based system but make it robust and stable.
+
+VERY IMPORTANT:
+Before generating code:
+
+1. Explain why prompt parsing is failing
+2. Explain why graph render state is lost
+3. Explain execution status issue
+4. Then generate minimal stable fixes
+
+# Future Roadmap
+
+## Phase 8
+
+PHASE 8 — ADVANCED WORKFLOW ORCHESTRATION
+
+IMPORTANT:
+Phase 7 AI workflow generation is completed.
+
+Current platform already supports:
+
+- workflow execution engine
+- configurable nodes
+- external integrations
+- lead automation
+- execution monitoring
+- AI workflow generation
+- workflow persistence
+- auth/security
+
+Now build:
+
+ADVANCED WORKFLOW ORCHESTRATION
+
+GOAL:
+Transform AutonomousOps AI into a true production-grade workflow orchestration platform.
+
+IMPORTANT:
+Do NOT rewrite existing runtime.
+Do NOT introduce distributed systems yet.
+Do NOT overengineer.
+
+Build advanced orchestration on top of current execution engine.
+
+MAIN FEATURES:
+
+1. CONDITIONAL BRANCHING
+
+Allow workflows to route execution dynamically.
+
+Examples:
+
+- if budget > 5000
+- if lead score >= 80
+- if API response success
+
+Support:
+
+- true path
+- false path
+
+---
+
+2. CONDITIONAL NODE
+
+Create configurable logic node.
+
+Fields:
+
+- left operand
+- operator
+- right operand
+
+Operators:
+
+- equals
+- greater than
+- less than
+- contains
+
+---
+
+3. PARALLEL EXECUTION
+
+Allow one node to fan out into multiple concurrent paths.
+
+Requirements:
+
+- parallel node execution
+- result tracking
+- completion synchronization
+
+---
+
+4. RETRY LOGIC
+
+Per node configurable retry settings:
+
+- retry count
+- retry delay
+- exponential backoff optional
+
+---
+
+5. FAILURE HANDLING
+
+Allow behavior selection:
+
+- stop workflow
+- continue
+- route to fallback node
+
+---
+
+6. EXECUTION PATH VISUALIZATION
+
+Show actual runtime branch taken during execution.
+
+---
+
+BACKEND REQUIREMENTS
+
+Build:
+
+- branching execution resolver
+- parallel execution manager
+- retry controller
+- failure policy handler
+
+---
+
+FRONTEND REQUIREMENTS
+
+Add:
+
+- conditional node config UI
+- branch visualization
+- retry settings UI
+- execution path rendering
+
+---
+
+IMPORTANT ENGINEERING RULES
+
+- minimal stable implementation
+- preserve architecture
+- incremental changes only
+- keep localhost stable
+
+VERY IMPORTANT:
+
+Before generating code:
+
+1. Explain branching execution architecture
+2. Explain parallel execution strategy
+3. Explain retry/failure handling flow
+4. Explain runtime synchronization
+5. Then implement incrementally

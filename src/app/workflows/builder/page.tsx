@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useMemo, useRef, Suspense } from "react";
+import { useState, useCallback, useEffect, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import ReactFlow, {
@@ -21,81 +21,80 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/lib/auth-context";
 import { api } from "@/lib/api";
+import { getNodeType, getNodeCategories, getDefaultConfig } from "@/lib/node-registry";
+import { NodeConfigPanel } from "@/components/workflow/node-config-panel";
+import { AIBuilderModal } from "@/components/workflow/ai-builder-modal";
 
-// Node type definitions
-const nodeCategories = {
-  triggers: [
-    { type: "webhook", label: "Webhook", icon: "🔗" },
-    { type: "schedule", label: "Schedule", icon: "⏰" },
-    { type: "email-trigger", label: "Email", icon: "📧" },
-    { type: "form", label: "Form", icon: "📝" },
-    { type: "api-trigger", label: "API", icon: "🌐" },
-  ],
-  actions: [
-    { type: "send-email", label: "Send Email", icon: "📧" },
-    { type: "slack", label: "Slack Message", icon: "💬" },
-    { type: "crm", label: "Save to CRM", icon: "💾" },
-    { type: "task", label: "Create Task", icon: "✅" },
-    { type: "http", label: "HTTP Request", icon: "🌐" },
-  ],
-  ai: [
-    { type: "classify", label: "Classify", icon: "🏷️" },
-    { type: "generate", label: "Generate", icon: "✨" },
-    { type: "analyze", label: "Analyze", icon: "📊" },
-    { type: "chat", label: "Chat", icon: "💬" },
-  ],
-  logic: [
-    { type: "condition", label: "Condition", icon: "🔀" },
-    { type: "transform", label: "Transform", icon: "🔄" },
-    { type: "delay", label: "Delay", icon: "⏱️" },
-  ],
+// Node sidebar categories from registry
+const nodeCategories = getNodeCategories();
+
+// Execution status overlay styles
+const execStatusStyles: Record<string, { ring: string; badge: string; label: string }> = {
+  success: { ring: "ring-2 ring-green-500 ring-offset-1", badge: "bg-green-600", label: "✓" },
+  failed: { ring: "ring-2 ring-red-500 ring-offset-1", badge: "bg-red-600", label: "✗" },
+  running: { ring: "ring-2 ring-blue-500 ring-offset-1 animate-pulse", badge: "bg-blue-600", label: "…" },
+  skipped: { ring: "ring-2 ring-yellow-500/50 ring-offset-1", badge: "bg-yellow-600", label: "⏭" },
 };
 
-const nodeColors: Record<string, string> = {
-  webhook: "bg-yellow-500/20 border-yellow-500",
-  schedule: "bg-yellow-500/20 border-yellow-500",
-  "email-trigger": "bg-yellow-500/20 border-yellow-500",
-  form: "bg-yellow-500/20 border-yellow-500",
-  "api-trigger": "bg-yellow-500/20 border-yellow-500",
-  "send-email": "bg-blue-500/20 border-blue-500",
-  slack: "bg-blue-500/20 border-blue-500",
-  crm: "bg-blue-500/20 border-blue-500",
-  task: "bg-blue-500/20 border-blue-500",
-  http: "bg-blue-500/20 border-blue-500",
-  classify: "bg-green-500/20 border-green-500",
-  generate: "bg-green-500/20 border-green-500",
-  analyze: "bg-green-500/20 border-green-500",
-  chat: "bg-green-500/20 border-green-500",
-  condition: "bg-purple-500/20 border-purple-500",
-  transform: "bg-cyan-500/20 border-cyan-500",
-  delay: "bg-orange-500/20 border-orange-500",
-};
-
-const nodeIcons: Record<string, string> = {
-  webhook: "🔗", schedule: "⏰", "email-trigger": "📧", form: "📝", "api-trigger": "🌐",
-  "send-email": "📧", slack: "💬", crm: "💾", task: "✅", http: "🌐",
-  classify: "🏷️", generate: "✨", analyze: "📊", chat: "💬",
-  condition: "🔀", transform: "🔄", delay: "⏱️",
-};
-
-// Custom node component
+// Custom node component — uses registry for icon/color, supports multiple output handles
 function WorkflowNode({ data, selected }: NodeProps) {
-  const colorClass = nodeColors[data.nodeType] || "bg-gray-500/20 border-gray-500";
-  const icon = nodeIcons[data.nodeType] || "⚙️";
+  const nodeTypeDef = getNodeType(data.nodeType);
+  const colorClass = nodeTypeDef.color;
+  const icon = nodeTypeDef.icon;
+  const outputHandles = nodeTypeDef.outputHandles;
+  const execStatus = data._execStatus as string | undefined;
+  const execDuration = data._execDuration as number | undefined;
+  const statusStyle = execStatus ? execStatusStyles[execStatus] : null;
 
   return (
     <div
-      className={`px-4 py-3 rounded-lg border-2 shadow-lg min-w-[140px] text-center cursor-pointer transition-all hover:scale-105 ${colorClass} ${selected ? "ring-2 ring-primary ring-offset-2" : ""}`}
+      className={`px-4 py-3 rounded-lg border-2 shadow-lg min-w-[140px] text-center cursor-pointer transition-all hover:scale-105 ${colorClass} ${selected ? "ring-2 ring-primary ring-offset-2" : ""} ${statusStyle ? statusStyle.ring : ""}`}
     >
       <Handle type="target" position={Position.Left} className="!bg-border !border-border" />
       <div className="text-2xl mb-1">{icon}</div>
       <div className="text-sm font-medium">{data.label}</div>
       <div className="text-xs text-muted-foreground capitalize mt-1">{data.nodeType}</div>
-      <Handle type="source" position={Position.Right} className="!bg-border !border-border" />
+
+      {/* Execution status badge */}
+      {statusStyle && (
+        <div className="mt-2 flex items-center justify-center gap-1">
+          <span className={`${statusStyle.badge} text-white text-[10px] px-2 py-0.5 rounded-full font-medium`}>
+            {statusStyle.label} {execStatus}
+          </span>
+          {execDuration != null && (
+            <span className="text-[10px] text-muted-foreground">
+              {execDuration < 1000 ? `${execDuration}ms` : `${(execDuration / 1000).toFixed(1)}s`}
+            </span>
+          )}
+        </div>
+      )}
+
+      {outputHandles ? (
+        <div className="flex flex-col items-end gap-1 mt-2">
+          {outputHandles.map((h, i) => (
+            <div key={h.id} className="flex items-center gap-1">
+              <span className="text-[10px] font-medium" style={{ color: h.color }}>{h.label}</span>
+              <Handle
+                type="source"
+                position={Position.Right}
+                id={h.id}
+                style={{
+                  background: h.color,
+                  borderColor: h.color,
+                  width: 10,
+                  height: 10,
+                  top: `${50 + (i - (outputHandles.length - 1) / 2) * 20}%`,
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <Handle type="source" position={Position.Right} className="!bg-border !border-border" />
+      )}
     </div>
   );
 }
@@ -117,7 +116,14 @@ function BuilderContent() {
   const [saving, setSaving] = useState(false);
   const [loadingWorkflow, setLoadingWorkflow] = useState(!!workflowId);
   const [saveMessage, setSaveMessage] = useState("");
+  const [running, setRunning] = useState(false);
+  const [executionResult, setExecutionResult] = useState<any>(null);
+  const [showExecutionPanel, setShowExecutionPanel] = useState(false);
+  const [activeEdgeIds, setActiveEdgeIds] = useState<Set<string>>(new Set());
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
+
+  // AI Builder modal state
+  const [showAIBuilder, setShowAIBuilder] = useState(false);
 
   // Undo/Redo history
   const undoStack = useRef<{ nodes: Node[]; edges: Edge[] }[]>([]);
@@ -147,6 +153,20 @@ function BuilderContent() {
     setEdges(next.edges);
     setSelectedNode(null);
   }, [nodes, edges, setNodes, setEdges]);
+
+  // Stable callback for AI builder — avoids stale closure in modal's useCallback
+  const handleAIApply = useCallback((generatedNodes: Node[], generatedEdges: Edge[], name: string, description: string) => {
+    pushToHistory();
+    setNodes(generatedNodes);
+    setEdges(generatedEdges);
+    setWorkflowName(name);
+    setWorkflowDescription(description);
+    setSelectedNode(null);
+    // Force fitView after nodes are applied so they're visible on canvas
+    setTimeout(() => {
+      reactFlowInstance?.fitView({ padding: 0.2, duration: 300 });
+    }, 50);
+  }, [pushToHistory, setNodes, setEdges, reactFlowInstance]);
 
   // Keyboard shortcuts for undo/redo
   useEffect(() => {
@@ -222,8 +242,16 @@ function BuilderContent() {
       setWorkflowName(wf.name);
       setWorkflowDescription(wf.description || "");
       // Parse nodes/edges from JSON (they're stored as JSON strings in DB)
-      const parsedNodes = typeof wf.nodes === "string" ? JSON.parse(wf.nodes) : wf.nodes;
+      let parsedNodes = typeof wf.nodes === "string" ? JSON.parse(wf.nodes) : wf.nodes;
       const parsedEdges = typeof wf.edges === "string" ? JSON.parse(wf.edges) : wf.edges;
+      // Inject webhookUrl into webhook trigger nodes if workflow has a webhookId
+      if (wf.webhookId && Array.isArray(parsedNodes)) {
+        parsedNodes = parsedNodes.map((n: any) =>
+          n.data?.nodeType === "webhook"
+            ? { ...n, data: { ...n.data, webhookUrl: `POST http://localhost:3001/api/webhooks/${wf.webhookId}` } }
+            : n
+        );
+      }
       setNodes(parsedNodes || []);
       setEdges(parsedEdges || []);
     }
@@ -251,6 +279,17 @@ function BuilderContent() {
         setSaveMessage("Error: " + result.error);
       } else {
         setSaveMessage("Saved!");
+        // Inject webhookUrl if webhookId was just generated
+        if (result.data?.webhookId) {
+          const webhookUrl = `POST http://localhost:3001/api/webhooks/${result.data.webhookId}`;
+          setNodes((nds) =>
+            nds.map((n: any) =>
+              n.data?.nodeType === "webhook"
+                ? { ...n, data: { ...n.data, webhookUrl } }
+                : n
+            )
+          );
+        }
       }
     } else {
       // Create new
@@ -265,6 +304,17 @@ function BuilderContent() {
       } else if (result.data) {
         setSaveMessage("Saved!");
         localStorage.removeItem("workflow-draft");
+        // Inject webhookUrl if workflow has a webhookId (from webhook trigger node)
+        if (result.data.webhookId) {
+          const webhookUrl = `POST http://localhost:3001/api/webhooks/${result.data.webhookId}`;
+          setNodes((nds) =>
+            nds.map((n: any) =>
+              n.data?.nodeType === "webhook"
+                ? { ...n, data: { ...n.data, webhookUrl } }
+                : n
+            )
+          );
+        }
         // Redirect to the new workflow's URL
         router.replace(`/workflows/builder?id=${result.data.id}`);
       }
@@ -273,11 +323,88 @@ function BuilderContent() {
     setTimeout(() => setSaveMessage(""), 3000);
   };
 
-  // Handle new connections
+  // Run workflow
+  const handleRun = async () => {
+    if (!user?.workspace?.id || !workflowId) return;
+    setRunning(true);
+    setExecutionResult(null);
+    setShowExecutionPanel(true);
+    setActiveEdgeIds(new Set());
+
+    const result = await api.executions.execute(user.workspace.id, workflowId);
+    if (result.data) {
+      setExecutionResult(result.data);
+
+      // Inject per-node execution status into canvas nodes
+      const execData = result.data as any;
+      const nodeResults: any[] = typeof execData.nodeResults === "string"
+        ? JSON.parse(execData.nodeResults)
+        : (execData.nodeResults || []);
+
+      if (nodeResults.length > 0) {
+        const statusMap: Record<string, { status: string; duration: number }> = {};
+        for (const nr of nodeResults) {
+          statusMap[nr.nodeId] = { status: nr.status, duration: nr.duration };
+        }
+
+        setNodes((nds) =>
+          nds.map((n) => {
+            const nr = statusMap[n.id];
+            if (nr) {
+              return {
+                ...n,
+                data: { ...n.data, _execStatus: nr.status, _execDuration: nr.duration },
+              };
+            }
+            return n;
+          })
+        );
+
+        // Compute active edges from execution path
+        const execPath: string[] = typeof execData.executionPath === "string"
+          ? JSON.parse(execData.executionPath || "[]")
+          : (execData.executionPath || []);
+
+        // Build set of active edge IDs from execution path
+        const activeIds = new Set<string>();
+        for (let i = 0; i < execPath.length - 1; i++) {
+          const sourceId = execPath[i];
+          const targetId = execPath[i + 1];
+          // Find edges connecting these nodes
+          for (const edge of edges) {
+            if (edge.source === sourceId && edge.target === targetId) {
+              activeIds.add(edge.id);
+            }
+          }
+        }
+        // Also mark edges for nodes that had branch info
+        for (const nr of nodeResults) {
+          if (nr.branchTaken) {
+            // Find edges from this node with matching sourceHandle
+            for (const edge of edges) {
+              if (edge.source === nr.nodeId && edge.sourceHandle === nr.branchTaken) {
+                activeIds.add(edge.id);
+              }
+            }
+          }
+        }
+        setActiveEdgeIds(activeIds);
+      }
+    } else if (result.error) {
+      setExecutionResult({ status: "FAILED", logs: [{ timestamp: new Date().toISOString(), nodeId: "system", nodeName: "System", message: result.error, level: "error" }] });
+    }
+    setRunning(false);
+  };
+
+  // Handle new connections — preserve sourceHandle for routing nodes
   const onConnect = useCallback(
     (params: Connection) => {
       pushToHistory();
-      setEdges((eds) => addEdge({ ...params, id: `e-${params.source}-${params.target}` }, eds));
+      const handleSuffix = params.sourceHandle ? `-${params.sourceHandle}` : "";
+      setEdges((eds) => addEdge({
+        ...params,
+        id: `e-${params.source}${handleSuffix}-${params.target}`,
+      }, eds));
     },
     [setEdges, pushToHistory]
   );
@@ -304,11 +431,12 @@ function BuilderContent() {
         y: event.clientY - bounds.top,
       });
 
+      const defaultConfig = getDefaultConfig(nodeType);
       const newNode: Node = {
         id: `${nodeType}-${Date.now()}`,
         type: "workflowNode",
         position,
-        data: { label: nodeLabel, nodeType },
+        data: { label: nodeLabel, nodeType, ...defaultConfig },
       };
 
       pushToHistory();
@@ -337,6 +465,18 @@ function BuilderContent() {
       )
     );
     setSelectedNode((prev) => (prev ? { ...prev, data: { ...prev.data, label } } : null));
+  };
+
+  // Update selected node's data field
+  const updateNodeData = (key: string, value: any) => {
+    if (!selectedNode) return;
+    pushToHistory();
+    setNodes((nds) =>
+      nds.map((n) =>
+        n.id === selectedNode.id ? { ...n, data: { ...n.data, [key]: value } } : n
+      )
+    );
+    setSelectedNode((prev) => (prev ? { ...prev, data: { ...prev.data, [key]: value } } : null));
   };
 
   // Delete selected node
@@ -501,17 +641,46 @@ function BuilderContent() {
             >
               🔄 Clear
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowAIBuilder(true)}
+              className="border-purple-500/50 text-purple-500 hover:bg-purple-500/10 hover:text-purple-400"
+            >
+              ✨ AI Generate
+            </Button>
             <Button size="sm" onClick={handleSave} disabled={saving}>
               {saving ? "💾 Saving..." : "💾 Save"}
             </Button>
+            {workflowId && (
+              <Button
+                size="sm"
+                variant="default"
+                onClick={handleRun}
+                disabled={running || nodes.length === 0}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                {running ? "⏳ Running..." : "▶ Run"}
+              </Button>
+            )}
           </div>
         </header>
 
         {/* Canvas */}
-        <div className="flex-1" ref={reactFlowWrapper}>
+        <div className="flex-1 relative" ref={reactFlowWrapper}>
           <ReactFlow
             nodes={nodes}
-            edges={edges}
+            edges={edges.map((e) => {
+              if (activeEdgeIds.size === 0) return e;
+              const isActive = activeEdgeIds.has(e.id);
+              return {
+                ...e,
+                style: isActive
+                  ? { stroke: "#22c55e", strokeWidth: 3 }
+                  : { stroke: "#94a3b8", strokeWidth: 1.5, opacity: 0.4 },
+                animated: isActive,
+              };
+            })}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
@@ -528,6 +697,97 @@ function BuilderContent() {
             <Controls />
             <Background gap={24} size={1} />
           </ReactFlow>
+
+          {/* Execution Results Panel */}
+          {showExecutionPanel && (
+            <div className="absolute bottom-0 left-0 right-0 bg-card border-t border-border max-h-[40vh] overflow-auto z-10 shadow-lg">
+              <div className="flex items-center justify-between p-3 border-b border-border sticky top-0 bg-card">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-sm font-semibold">Execution Results</h3>
+                  {executionResult && (
+                    <Badge
+                      variant={executionResult.status === "SUCCESS" ? "default" : "destructive"}
+                      className={executionResult.status === "SUCCESS" ? "bg-green-600" : ""}
+                    >
+                      {executionResult.status}
+                    </Badge>
+                  )}
+                  {executionResult?.duration != null && (
+                    <span className="text-xs text-muted-foreground">
+                      {executionResult.duration}ms
+                    </span>
+                  )}
+                  {executionResult?.id && (
+                    <a
+                      href={`/executions/${executionResult.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-primary underline hover:no-underline"
+                    >
+                      View Details →
+                    </a>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setNodes((nds) =>
+                        nds.map((n) => {
+                          const { _execStatus, _execDuration, ...restData } = n.data;
+                          return { ...n, data: restData };
+                        })
+                      );
+                    }}
+                  >
+                    Clear Status
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => { setShowExecutionPanel(false); setExecutionResult(null); }}
+                  >
+                    ✕
+                  </Button>
+                </div>
+              </div>
+
+              <div className="p-3">
+                {running && (
+                  <div className="flex items-center gap-2 py-4 justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+                    <span className="text-sm text-muted-foreground">Executing workflow...</span>
+                  </div>
+                )}
+
+                {executionResult?.logs && (
+                  <div className="space-y-1 font-mono text-xs">
+                    {(executionResult.logs as any[]).map((log: any, i: number) => (
+                      <div
+                        key={i}
+                        className={`flex gap-3 py-1 px-2 rounded ${
+                          log.level === "error"
+                            ? "bg-red-500/10 text-red-400"
+                            : log.level === "success"
+                            ? "bg-green-500/10 text-green-400"
+                            : log.level === "warning"
+                            ? "bg-yellow-500/10 text-yellow-400"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        <span className="shrink-0 w-16 text-right opacity-60">
+                          {new Date(log.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                        </span>
+                        <span className="shrink-0 w-24 truncate font-medium">{log.nodeName}</span>
+                        <span className="flex-1">{log.message}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -539,43 +799,12 @@ function BuilderContent() {
 
         <div className="p-4 flex-1 overflow-auto">
           {selectedNode ? (
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-background">
-                <span className="text-2xl">{nodeIcons[selectedNode.data.nodeType] || "⚙️"}</span>
-                <div>
-                  <div className="font-medium">{selectedNode.data.label}</div>
-                  <div className="text-xs text-muted-foreground capitalize">{selectedNode.data.nodeType}</div>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-xs text-muted-foreground">Node Name</Label>
-                  <Input
-                    value={selectedNode.data.label}
-                    onChange={(e) => updateNodeLabel(e.target.value)}
-                    className="mt-1"
-                  />
-                </div>
-
-                <div>
-                  <Label className="text-xs text-muted-foreground">Node ID</Label>
-                  <Input value={selectedNode.id} disabled className="mt-1" />
-                </div>
-
-                <div>
-                  <Label className="text-xs text-muted-foreground">Position</Label>
-                  <div className="flex gap-2 mt-1">
-                    <Input value={`x: ${Math.round(selectedNode.position.x)}`} disabled className="flex-1" />
-                    <Input value={`y: ${Math.round(selectedNode.position.y)}`} disabled className="flex-1" />
-                  </div>
-                </div>
-              </div>
-
-              <Button variant="destructive" size="sm" className="w-full mt-4" onClick={deleteSelectedNode}>
-                🗑️ Delete Node
-              </Button>
-            </div>
+            <NodeConfigPanel
+              node={selectedNode}
+              onUpdateLabel={updateNodeLabel}
+              onUpdateData={updateNodeData}
+              onDelete={deleteSelectedNode}
+            />
           ) : (
             <div className="text-center text-muted-foreground py-8">
               <p className="text-sm">Select a node to configure it</p>
@@ -590,6 +819,13 @@ function BuilderContent() {
           </div>
         </div>
       </aside>
+
+      {/* AI Builder Modal */}
+      <AIBuilderModal
+        isOpen={showAIBuilder}
+        onClose={() => setShowAIBuilder(false)}
+        onApply={handleAIApply}
+      />
     </div>
   );
 }

@@ -13,16 +13,9 @@ import { api } from "@/lib/api";
 const navItems = [
   { icon: "📊", label: "Dashboard", href: "/dashboard", active: true },
   { icon: "🔄", label: "Workflows", href: "/workflows/builder", active: false },
-  { icon: "📜", label: "History", href: "/workflows/history", active: false },
-  { icon: "🏢", label: "Workspace", href: "/settings", active: false },
+  { icon: "📜", label: "My Workflows", href: "/workflows/history", active: false },
+  { icon: "📈", label: "Executions", href: "/executions", active: false },
   { icon: "⚙️", label: "Settings", href: "/settings", active: false },
-];
-
-const sidebarLinks = [
-  { icon: "📁", label: "All Workflows", count: 24 },
-  { icon: "▶️", label: "Active", count: 18 },
-  { icon: "⏸️", label: "Inactive", count: 4 },
-  { icon: "📝", label: "Drafts", count: 2 },
 ];
 
 interface WorkflowFromApi {
@@ -36,12 +29,42 @@ interface WorkflowFromApi {
   updatedAt: string;
 }
 
+interface ExecutionFromApi {
+  id: string;
+  workflowId: string;
+  status: string;
+  triggerSource: string;
+  duration: number | null;
+  startedAt: string;
+  workflow: { id: string; name: string };
+}
+
+interface ExecStats {
+  total: number;
+  today: number;
+  successRate: number;
+}
+
+function formatExecTime(dateStr: string) {
+  const d = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - d.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  if (diffMins < 1) return "just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
 export default function DashboardPage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
   const [isLoadingPage, setIsLoadingPage] = useState(true);
   const [workflows, setWorkflows] = useState<WorkflowFromApi[]>([]);
   const [workflowsLoading, setWorkflowsLoading] = useState(true);
+  const [recentExecutions, setRecentExecutions] = useState<ExecutionFromApi[]>([]);
+  const [execStats, setExecStats] = useState<ExecStats | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -55,6 +78,7 @@ export default function DashboardPage() {
     if (user?.workspace?.id) {
       setWorkflows([]);
       loadWorkflows();
+      loadExecutionData();
     }
   }, [user?.id]);
 
@@ -66,6 +90,20 @@ export default function DashboardPage() {
       setWorkflows(result.data);
     }
     setWorkflowsLoading(false);
+  };
+
+  const loadExecutionData = async () => {
+    if (!user?.workspace?.id) return;
+    const [execResult, statsResult] = await Promise.all([
+      api.executions.getAll(user.workspace.id),
+      api.executions.getStats(user.workspace.id),
+    ]);
+    if (execResult.data) {
+      setRecentExecutions((execResult.data as ExecutionFromApi[]).slice(0, 5));
+    }
+    if (statsResult.data) {
+      setExecStats(statsResult.data as ExecStats);
+    }
   };
 
   if (loading || isLoadingPage) {
@@ -85,7 +123,6 @@ export default function DashboardPage() {
 
   const recentWorkflows = workflows.slice(0, 5);
 
-  // Get actual user initials for avatar
   const userInitials = user.name
     ? user.name.split(" ").map(n => n[0]).join("").toUpperCase()
     : user.email[0].toUpperCase();
@@ -131,21 +168,20 @@ export default function DashboardPage() {
 
         <div className="px-4 mt-8">
           <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-            Quick Filters
+            Quick Links
           </h3>
-          {sidebarLinks.map((link) => (
-            <Link
-              key={link.label}
-              href="#"
-              className="flex items-center justify-between px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-            >
-              <span className="flex items-center gap-2">
-                <span>{link.icon}</span>
-                {link.label}
-              </span>
-              <span className="text-xs bg-muted px-2 py-0.5 rounded-full">{link.count}</span>
-            </Link>
-          ))}
+          <Link
+            href="/executions"
+            className="flex items-center justify-between px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+          >
+            <span className="flex items-center gap-2">
+              <span>📈</span>
+              Execution History
+            </span>
+            {execStats && (
+              <span className="text-xs bg-muted px-2 py-0.5 rounded-full">{execStats.total}</span>
+            )}
+          </Link>
         </div>
       </aside>
 
@@ -177,7 +213,7 @@ export default function DashboardPage() {
         <main className="flex-1 p-6 overflow-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-            <p className="text-muted-foreground mt-1">Welcome back, {user.name || user.email.split('@')[0]}!</p>
+            <p className="text-muted-foreground mt-1">Welcome back, {user.name || user.email.split("@")[0]}!</p>
           </div>
 
           {/* Stats Cards */}
@@ -195,39 +231,33 @@ export default function DashboardPage() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Public Workflows</CardTitle>
-                <span className="text-2xl">▶️</span>
+                <CardTitle className="text-sm font-medium text-muted-foreground">Total Executions</CardTitle>
+                <span className="text-2xl">⚡</span>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{workflowsLoading ? "—" : workflows.filter(w => w.isPublic).length}</div>
-                <p className="text-xs text-green-400 mt-1">Shared with workspace</p>
+                <div className="text-3xl font-bold">{execStats ? execStats.total : "—"}</div>
+                <p className="text-xs text-muted-foreground mt-1">{execStats ? `${execStats.today} today` : "—"}</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">This Week</CardTitle>
-                <span className="text-2xl">⚡</span>
+                <CardTitle className="text-sm font-medium text-muted-foreground">Success Rate</CardTitle>
+                <span className="text-2xl">✅</span>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">
-                  {workflowsLoading ? "—" : workflows.filter(w => {
-                    const weekAgo = new Date();
-                    weekAgo.setDate(weekAgo.getDate() - 7);
-                    return new Date(w.createdAt) > weekAgo;
-                  }).length}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">New this week</p>
+                <div className="text-3xl font-bold">{execStats ? `${execStats.successRate}%` : "—"}</div>
+                <p className="text-xs text-emerald-400 mt-1">Execution success rate</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">Workspace</CardTitle>
-                <span className="text-2xl">✅</span>
+                <span className="text-2xl">🏢</span>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{user.workspace?.name?.split(' ')[0] || "—"}</div>
+                <div className="text-lg font-bold truncate">{user.workspace?.name || "—"}</div>
                 <p className="text-xs text-muted-foreground mt-1">Active workspace</p>
               </CardContent>
             </Card>
@@ -289,42 +319,66 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            {/* Activity Feed */}
+            {/* Recent Executions - Real Data */}
             <Card>
               <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>Latest workflow executions and changes</CardDescription>
+                <CardTitle>Recent Executions</CardTitle>
+                <CardDescription>Latest workflow execution runs</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent transition-colors">
-                    <div className="w-2 h-2 rounded-full mt-2 bg-green-500" />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm">
-                        <span className="font-medium">Lead Qualification Pipeline</span> executed successfully
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1">2 minutes ago</div>
-                    </div>
+                {recentExecutions.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground mb-2">No executions yet</p>
+                    <p className="text-xs text-muted-foreground/70">Run a workflow to see execution history</p>
                   </div>
-                  <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent transition-colors">
-                    <div className="w-2 h-2 rounded-full mt-2 bg-green-500" />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm">
-                        <span className="font-medium">Customer Onboarding Flow</span> completed
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1">1 hour ago</div>
-                    </div>
+                ) : (
+                  <div className="space-y-3">
+                    {recentExecutions.map((exec) => (
+                      <Link
+                        key={exec.id}
+                        href={`/executions/${exec.id}`}
+                        className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent transition-colors block"
+                      >
+                        <div className={`w-2 h-2 rounded-full mt-2 shrink-0 ${
+                          exec.status === "SUCCESS" ? "bg-emerald-500" :
+                          exec.status === "FAILED" ? "bg-red-500" :
+                          exec.status === "RUNNING" ? "bg-blue-500 animate-pulse" :
+                          "bg-yellow-500"
+                        }`} />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm">
+                            <span className="font-medium">{exec.workflow?.name || "Unknown"}</span>
+                            <span className={`ml-2 text-xs ${
+                              exec.status === "SUCCESS" ? "text-emerald-500" :
+                              exec.status === "FAILED" ? "text-red-500" :
+                              "text-muted-foreground"
+                            }`}>
+                              {exec.status === "SUCCESS" ? "completed" :
+                               exec.status === "FAILED" ? "failed" :
+                               exec.status.toLowerCase()}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                            <span>{formatExecTime(exec.startedAt)}</span>
+                            {exec.duration != null && (
+                              <>
+                                <span>·</span>
+                                <span className="font-mono">{exec.duration < 1000 ? `${exec.duration}ms` : `${(exec.duration / 1000).toFixed(1)}s`}</span>
+                              </>
+                            )}
+                            <span>·</span>
+                            <span className="capitalize">{exec.triggerSource || "manual"}</span>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                    <Link href="/executions" className="block mt-2">
+                      <Button variant="outline" className="w-full" size="sm">
+                        View All Executions
+                      </Button>
+                    </Link>
                   </div>
-                  <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent transition-colors">
-                    <div className="w-2 h-2 rounded-full mt-2 bg-red-500" />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm">
-                        <span className="font-medium">Invoice Generation</span> failed
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1">3 hours ago</div>
-                    </div>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -339,10 +393,10 @@ export default function DashboardPage() {
                   <span>Create New Workflow</span>
                 </Button>
               </Link>
-              <Link href="/workflows/history">
+              <Link href="/executions">
                 <Button variant="outline" className="w-full h-auto py-4 flex flex-col items-center gap-2">
-                  <span className="text-2xl">📜</span>
-                  <span>View Execution History</span>
+                  <span className="text-2xl">📈</span>
+                  <span>Execution History</span>
                 </Button>
               </Link>
               <Link href="/settings">

@@ -5,6 +5,7 @@ export interface Workflow {
   nodes: WorkflowNode[];
   edges: WorkflowEdge[];
   isPublic: boolean;
+  webhookId?: string | null;
   workspaceId: string;
   userId: string;
   createdAt: string;
@@ -25,16 +26,35 @@ export interface Execution {
   id: string;
   workflowId: string;
   workflowName: string;
-  status: "success" | "failed" | "running" | "pending";
+  status: string;
+  triggerSource?: string;
   startedAt: string;
   completedAt?: string;
   duration?: number;
+  triggerData?: any;
+  outputData?: any;
+  nodeResults?: NodeResult[];
   logs: ExecutionLog[];
+  errorTrace?: string;
+}
+
+export interface NodeResult {
+  nodeId: string;
+  nodeName: string;
+  nodeType: string;
+  status: "success" | "failed" | "skipped";
+  input: any;
+  output: any;
+  startedAt: string;
+  completedAt: string;
+  duration: number;
+  error?: string;
 }
 
 export interface ExecutionLog {
   timestamp: string;
-  node: string;
+  nodeId: string;
+  nodeName: string;
   message: string;
   level: "info" | "error" | "warning" | "success";
 }
@@ -81,4 +101,10 @@ export interface Activity {
   description: string;
   timestamp: string;
   status?: "success" | "failed";
+}
+
+export interface ExecutionStats {
+  total: number;
+  today: number;
+  successRate: number;
 }

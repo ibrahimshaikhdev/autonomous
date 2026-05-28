@@ -42,6 +42,20 @@ model Workspace {
   @@map("workspaces")
 }
 
+enum ExecutionStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+enum LogLevel {
+  INFO
+  ERROR
+  WARNING
+  SUCCESS
+}
+
 model Workflow {
   id          String     @id @default(uuid())
   name        String
@@ -49,12 +63,32 @@ model Workflow {
   nodes       Json // Stores React Flow nodes
   edges       Json // Stores React Flow edges
   isPublic    Boolean    @default(false)
+  webhookId   String?    @unique
   workspaceId String
   workspace   Workspace  @relation(fields: [workspaceId], references: [id])
   userId      String
   user        User       @relation(fields: [userId], references: [id])
+  executions  Execution[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
   @@map("workflows")
+}
+
+model Execution {
+  id            String         @id @default(uuid())
+  workflowId    String
+  workflow      Workflow       @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  status        ExecutionStatus @default(PENDING)
+  triggerData   Json?
+  outputData    Json?
+  nodeResults   Json?          @default("[]")
+  logs          Json           @default("[]")
+  triggerSource String?        @default("manual")
+  startedAt     DateTime       @default(now())
+  completedAt   DateTime?
+  duration      Int?
+  errorTrace    String?        @db.Text
+
+  @@map("executions")
 }

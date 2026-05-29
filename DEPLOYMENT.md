@@ -1,6 +1,7 @@
 # AutonomousOps AI - Free Deployment Guide
 
 ## Architecture
+
 ```
 Frontend (Next.js)  -->  Vercel (free)
 Backend (NestJS)    -->  Render (free tier)
@@ -103,6 +104,7 @@ After Vercel gives you the URL:
 Render automatically runs `prisma migrate deploy` on startup (configured in Dockerfile).
 
 If you need to run manually:
+
 ```bash
 # From your local machine, with production DATABASE_URL set
 cd backend
@@ -113,11 +115,11 @@ npx prisma migrate deploy
 
 ## Free Tier Limits
 
-| Service | Limit |
-|---------|-------|
-| **Vercel** | 100GB bandwidth/month, unlimited deploys |
-| **Render** | 750 hours/month, auto-sleep after 15min inactivity |
-| **TiDB Serverless** | 5GB storage, 50M Request Units/month |
+| Service             | Limit                                              |
+| ------------------- | -------------------------------------------------- |
+| **Vercel**          | 100GB bandwidth/month, unlimited deploys           |
+| **Render**          | 750 hours/month, auto-sleep after 15min inactivity |
+| **TiDB Serverless** | 5GB storage, 50M Request Units/month               |
 
 ## Important Notes
 
@@ -133,7 +135,7 @@ npx prisma migrate deploy
 ```bash
 # Test backend locally with production DB
 cd backend
-DATABASE_URL="your-tidb-url" npm run start:dev
+DATABASE_URL="mysql://username:password@gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com:4000/sys?sslaccept=strict" npm run start:dev
 
 # Build frontend locally
 npm run build

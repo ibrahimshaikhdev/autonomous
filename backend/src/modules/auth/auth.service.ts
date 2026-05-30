@@ -1,10 +1,14 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-import * as nodemailer from 'nodemailer';
-import { PrismaService } from '../../prisma/prisma.service';
-import { SignupDto } from './dto/signup.dto';
-import { LoginDto } from './dto/login.dto';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+} from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import * as bcrypt from "bcrypt";
+import * as nodemailer from "nodemailer";
+import { PrismaService } from "../../prisma/prisma.service";
+import { SignupDto } from "./dto/signup.dto";
+import { LoginDto } from "./dto/login.dto";
 
 @Injectable()
 export class AuthService {
@@ -15,7 +19,9 @@ export class AuthService {
     private jwtService: JwtService,
   ) {
     this.transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
       auth: {
         user: process.env.SMTP_EMAIL,
         pass: process.env.SMTP_APP_PASSWORD,
@@ -31,13 +37,19 @@ export class AuthService {
     });
 
     if (existingUser) {
-      throw new ConflictException('User with this email already exists');
+      throw new ConflictException("User with this email already exists");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const workspaceNameToUse = workspaceName || `${name}'s Workspace`;
-    const slug = workspaceNameToUse.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now();
+    const slug =
+      workspaceNameToUse
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^a-z0-9-]/g, "") +
+      "-" +
+      Date.now();
 
     const workspace = await this.prisma.workspace.create({
       data: {
@@ -51,7 +63,7 @@ export class AuthService {
         email,
         password: hashedPassword,
         name,
-        role: 'OWNER',
+        role: "OWNER",
         workspaceId: workspace.id,
       },
       include: {
@@ -76,13 +88,13 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new UnauthorizedException("Invalid email or password");
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new UnauthorizedException("Invalid email or password");
     }
 
     const token = this.generateToken(user.id, user.email);
@@ -100,7 +112,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException("User not found");
     }
 
     return this.sanitizeUser(user);
@@ -113,7 +125,10 @@ export class AuthService {
 
     // Always return success to prevent email enumeration
     if (!user) {
-      return { message: 'If an account with that email exists, a reset code has been sent' };
+      return {
+        message:
+          "If an account with that email exists, a reset code has been sent",
+      };
     }
 
     // Generate 6-digit OTP
@@ -135,7 +150,7 @@ export class AuthService {
       await this.transporter.sendMail({
         from: `"AutonomousOps" <${process.env.SMTP_EMAIL}>`,
         to: email,
-        subject: 'Your Password Reset Code',
+        subject: "Your Password Reset Code",
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px;">
             <h2 style="color: #333;">Password Reset Code</h2>
@@ -148,10 +163,13 @@ export class AuthService {
         `,
       });
     } catch (error) {
-      console.error('Failed to send email via Gmail SMTP:', error);
+      console.error("Failed to send email via Gmail SMTP:", error);
     }
 
-    return { message: 'If an account with that email exists, a reset code has been sent' };
+    return {
+      message:
+        "If an account with that email exists, a reset code has been sent",
+    };
   }
 
   async verifyOtp(email: string, otp: string) {
@@ -160,7 +178,7 @@ export class AuthService {
     });
 
     if (!user || !user.passwordOtp || !user.passwordOtpExpires) {
-      throw new UnauthorizedException('Invalid or expired reset code');
+      throw new UnauthorizedException("Invalid or expired reset code");
     }
 
     if (new Date() > user.passwordOtpExpires) {
@@ -169,12 +187,14 @@ export class AuthService {
         where: { id: user.id },
         data: { passwordOtp: null, passwordOtpExpires: null },
       });
-      throw new UnauthorizedException('Reset code has expired. Please request a new one.');
+      throw new UnauthorizedException(
+        "Reset code has expired. Please request a new one.",
+      );
     }
 
     const isValid = await bcrypt.compare(otp, user.passwordOtp);
     if (!isValid) {
-      throw new UnauthorizedException('Invalid reset code');
+      throw new UnauthorizedException("Invalid reset code");
     }
 
     // OTP is valid — clear it and issue a short-lived reset JWT
@@ -184,8 +204,8 @@ export class AuthService {
     });
 
     const resetToken = this.jwtService.sign(
-      { sub: user.id, type: 'password-reset' },
-      { expiresIn: '5m' },
+      { sub: user.id, type: "password-reset" },
+      { expiresIn: "5m" },
     );
 
     return { resetToken };
@@ -195,8 +215,8 @@ export class AuthService {
     try {
       const payload = this.jwtService.verify(token);
 
-      if (payload.type !== 'password-reset') {
-        throw new UnauthorizedException('Invalid reset token');
+      if (payload.type !== "password-reset") {
+        throw new UnauthorizedException("Invalid reset token");
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -206,10 +226,10 @@ export class AuthService {
         data: { password: hashedPassword },
       });
 
-      return { message: 'Password has been reset successfully' };
+      return { message: "Password has been reset successfully" };
     } catch (error) {
       if (error instanceof UnauthorizedException) throw error;
-      throw new UnauthorizedException('Invalid or expired reset token');
+      throw new UnauthorizedException("Invalid or expired reset token");
     }
   }
 

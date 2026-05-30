@@ -19,7 +19,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {
     this.transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
+      host: "smtp-relay.brevo.com",
       port: 587,
       secure: false,
       auth: {

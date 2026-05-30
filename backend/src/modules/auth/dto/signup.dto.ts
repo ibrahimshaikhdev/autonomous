@@ -1,4 +1,10 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MinLength,
+} from "class-validator";
 
 export class SignupDto {
   @IsEmail()
@@ -14,6 +20,7 @@ export class SignupDto {
   @IsNotEmpty()
   name: string;
 
+  @IsOptional()
   @IsString()
   workspaceName?: string;
 }

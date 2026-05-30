@@ -17,9 +17,7 @@ services:
         sync: false
       - key: PORT
         value: 3001
-      - key: SMTP_EMAIL
-        sync: false
-      - key: SMTP_APP_PASSWORD
+      - key: RESEND_API_KEY
         sync: false
       - key: GOOGLE_CLIENT_ID
         sync: false

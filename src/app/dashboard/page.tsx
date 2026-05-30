@@ -4,7 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth-context";
@@ -13,7 +19,12 @@ import { api } from "@/lib/api";
 const navItems = [
   { icon: "📊", label: "Dashboard", href: "/dashboard", active: true },
   { icon: "🔄", label: "Workflows", href: "/workflows/builder", active: false },
-  { icon: "📜", label: "My Workflows", href: "/workflows/history", active: false },
+  {
+    icon: "📜",
+    label: "My Workflows",
+    href: "/workflows/history",
+    active: false,
+  },
   { icon: "📈", label: "Executions", href: "/executions", active: false },
   { icon: "⚙️", label: "Settings", href: "/settings", active: false },
 ];
@@ -63,7 +74,9 @@ export default function DashboardPage() {
   const [isLoadingPage, setIsLoadingPage] = useState(true);
   const [workflows, setWorkflows] = useState<WorkflowFromApi[]>([]);
   const [workflowsLoading, setWorkflowsLoading] = useState(true);
-  const [recentExecutions, setRecentExecutions] = useState<ExecutionFromApi[]>([]);
+  const [recentExecutions, setRecentExecutions] = useState<ExecutionFromApi[]>(
+    [],
+  );
   const [execStats, setExecStats] = useState<ExecStats | null>(null);
 
   useEffect(() => {
@@ -124,7 +137,11 @@ export default function DashboardPage() {
   const recentWorkflows = workflows.slice(0, 5);
 
   const userInitials = user.name
-    ? user.name.split(" ").map(n => n[0]).join("").toUpperCase()
+    ? user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
     : user.email[0].toUpperCase();
 
   return (
@@ -132,11 +149,13 @@ export default function DashboardPage() {
       {/* Sidebar */}
       <aside className="w-64 border-r border-border bg-card shrink-0">
         <div className="p-4 border-b border-border">
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/dashboard" className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-lg">
               A
             </div>
-            <span className="text-xl font-bold tracking-tight">AutonomousOps</span>
+            <span className="text-xl font-bold tracking-tight">
+              AutonomousOps
+            </span>
           </Link>
         </div>
 
@@ -179,7 +198,9 @@ export default function DashboardPage() {
               Execution History
             </span>
             {execStats && (
-              <span className="text-xs bg-muted px-2 py-0.5 rounded-full">{execStats.total}</span>
+              <span className="text-xs bg-muted px-2 py-0.5 rounded-full">
+                {execStats.total}
+              </span>
             )}
           </Link>
         </div>
@@ -200,7 +221,9 @@ export default function DashboardPage() {
               </Avatar>
               <div className="text-sm">
                 <div className="font-medium">{user.name || "User"}</div>
-                <div className="text-muted-foreground text-xs">{user.workspace?.name || "Personal"}</div>
+                <div className="text-muted-foreground text-xs">
+                  {user.workspace?.name || "Personal"}
+                </div>
               </div>
             </div>
             <Button variant="ghost" size="sm" onClick={logout}>
@@ -213,52 +236,78 @@ export default function DashboardPage() {
         <main className="flex-1 p-6 overflow-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-            <p className="text-muted-foreground mt-1">Welcome back, {user.name || user.email.split("@")[0]}!</p>
+            <p className="text-muted-foreground mt-1">
+              Welcome back, {user.name || user.email.split("@")[0]}!
+            </p>
           </div>
 
           {/* Stats Cards */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Total Workflows</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Total Workflows
+                </CardTitle>
                 <span className="text-2xl">📊</span>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{workflowsLoading ? "—" : workflows.length}</div>
-                <p className="text-xs text-muted-foreground mt-1">Saved workflows</p>
+                <div className="text-3xl font-bold">
+                  {workflowsLoading ? "—" : workflows.length}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Saved workflows
+                </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Total Executions</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Total Executions
+                </CardTitle>
                 <span className="text-2xl">⚡</span>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{execStats ? execStats.total : "—"}</div>
-                <p className="text-xs text-muted-foreground mt-1">{execStats ? `${execStats.today} today` : "—"}</p>
+                <div className="text-3xl font-bold">
+                  {execStats ? execStats.total : "—"}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {execStats ? `${execStats.today} today` : "—"}
+                </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Success Rate</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Success Rate
+                </CardTitle>
                 <span className="text-2xl">✅</span>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{execStats ? `${execStats.successRate}%` : "—"}</div>
-                <p className="text-xs text-emerald-400 mt-1">Execution success rate</p>
+                <div className="text-3xl font-bold">
+                  {execStats ? `${execStats.successRate}%` : "—"}
+                </div>
+                <p className="text-xs text-emerald-400 mt-1">
+                  Execution success rate
+                </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Workspace</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Workspace
+                </CardTitle>
                 <span className="text-2xl">🏢</span>
               </CardHeader>
               <CardContent>
-                <div className="text-lg font-bold truncate">{user.workspace?.name || "—"}</div>
-                <p className="text-xs text-muted-foreground mt-1">Active workspace</p>
+                <div className="text-lg font-bold truncate">
+                  {user.workspace?.name || "—"}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Active workspace
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -268,7 +317,9 @@ export default function DashboardPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Recent Workflows</CardTitle>
-                <CardDescription>Your most recently modified workflows</CardDescription>
+                <CardDescription>
+                  Your most recently modified workflows
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {workflowsLoading ? (
@@ -277,7 +328,9 @@ export default function DashboardPage() {
                   </div>
                 ) : recentWorkflows.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-muted-foreground mb-4">No workflows yet</p>
+                    <p className="text-muted-foreground mb-4">
+                      No workflows yet
+                    </p>
                     <Link href="/workflows/builder">
                       <Button>Create Your First Workflow</Button>
                     </Link>
@@ -292,7 +345,9 @@ export default function DashboardPage() {
                           className="flex items-center justify-between p-3 rounded-lg bg-background/50 hover:bg-accent transition-colors block"
                         >
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium truncate">{workflow.name}</div>
+                            <div className="font-medium truncate">
+                              {workflow.name}
+                            </div>
                             <div className="text-sm text-muted-foreground truncate">
                               {workflow.description || "No description"}
                             </div>
@@ -302,7 +357,9 @@ export default function DashboardPage() {
                               <Badge variant="outline">Public</Badge>
                             )}
                             <span className="text-xs text-muted-foreground whitespace-nowrap">
-                              {new Date(workflow.updatedAt).toLocaleDateString()}
+                              {new Date(
+                                workflow.updatedAt,
+                              ).toLocaleDateString()}
                             </span>
                           </div>
                         </Link>
@@ -323,13 +380,19 @@ export default function DashboardPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Recent Executions</CardTitle>
-                <CardDescription>Latest workflow execution runs</CardDescription>
+                <CardDescription>
+                  Latest workflow execution runs
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {recentExecutions.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-muted-foreground mb-2">No executions yet</p>
-                    <p className="text-xs text-muted-foreground/70">Run a workflow to see execution history</p>
+                    <p className="text-muted-foreground mb-2">
+                      No executions yet
+                    </p>
+                    <p className="text-xs text-muted-foreground/70">
+                      Run a workflow to see execution history
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -339,23 +402,36 @@ export default function DashboardPage() {
                         href={`/executions/${exec.id}`}
                         className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent transition-colors block"
                       >
-                        <div className={`w-2 h-2 rounded-full mt-2 shrink-0 ${
-                          exec.status === "SUCCESS" ? "bg-emerald-500" :
-                          exec.status === "FAILED" ? "bg-red-500" :
-                          exec.status === "RUNNING" ? "bg-blue-500 animate-pulse" :
-                          "bg-yellow-500"
-                        }`} />
+                        <div
+                          className={`w-2 h-2 rounded-full mt-2 shrink-0 ${
+                            exec.status === "SUCCESS"
+                              ? "bg-emerald-500"
+                              : exec.status === "FAILED"
+                                ? "bg-red-500"
+                                : exec.status === "RUNNING"
+                                  ? "bg-blue-500 animate-pulse"
+                                  : "bg-yellow-500"
+                          }`}
+                        />
                         <div className="flex-1 min-w-0">
                           <div className="text-sm">
-                            <span className="font-medium">{exec.workflow?.name || "Unknown"}</span>
-                            <span className={`ml-2 text-xs ${
-                              exec.status === "SUCCESS" ? "text-emerald-500" :
-                              exec.status === "FAILED" ? "text-red-500" :
-                              "text-muted-foreground"
-                            }`}>
-                              {exec.status === "SUCCESS" ? "completed" :
-                               exec.status === "FAILED" ? "failed" :
-                               exec.status.toLowerCase()}
+                            <span className="font-medium">
+                              {exec.workflow?.name || "Unknown"}
+                            </span>
+                            <span
+                              className={`ml-2 text-xs ${
+                                exec.status === "SUCCESS"
+                                  ? "text-emerald-500"
+                                  : exec.status === "FAILED"
+                                    ? "text-red-500"
+                                    : "text-muted-foreground"
+                              }`}
+                            >
+                              {exec.status === "SUCCESS"
+                                ? "completed"
+                                : exec.status === "FAILED"
+                                  ? "failed"
+                                  : exec.status.toLowerCase()}
                             </span>
                           </div>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
@@ -363,11 +439,17 @@ export default function DashboardPage() {
                             {exec.duration != null && (
                               <>
                                 <span>·</span>
-                                <span className="font-mono">{exec.duration < 1000 ? `${exec.duration}ms` : `${(exec.duration / 1000).toFixed(1)}s`}</span>
+                                <span className="font-mono">
+                                  {exec.duration < 1000
+                                    ? `${exec.duration}ms`
+                                    : `${(exec.duration / 1000).toFixed(1)}s`}
+                                </span>
                               </>
                             )}
                             <span>·</span>
-                            <span className="capitalize">{exec.triggerSource || "manual"}</span>
+                            <span className="capitalize">
+                              {exec.triggerSource || "manual"}
+                            </span>
                           </div>
                         </div>
                       </Link>
@@ -388,19 +470,28 @@ export default function DashboardPage() {
             <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
             <div className="grid gap-4 md:grid-cols-3">
               <Link href="/workflows/builder">
-                <Button variant="outline" className="w-full h-auto py-4 flex flex-col items-center gap-2">
+                <Button
+                  variant="outline"
+                  className="w-full h-auto py-4 flex flex-col items-center gap-2"
+                >
                   <span className="text-2xl">➕</span>
                   <span>Create New Workflow</span>
                 </Button>
               </Link>
               <Link href="/executions">
-                <Button variant="outline" className="w-full h-auto py-4 flex flex-col items-center gap-2">
+                <Button
+                  variant="outline"
+                  className="w-full h-auto py-4 flex flex-col items-center gap-2"
+                >
                   <span className="text-2xl">📈</span>
                   <span>Execution History</span>
                 </Button>
               </Link>
               <Link href="/settings">
-                <Button variant="outline" className="w-full h-auto py-4 flex flex-col items-center gap-2">
+                <Button
+                  variant="outline"
+                  className="w-full h-auto py-4 flex flex-col items-center gap-2"
+                >
                   <span className="text-2xl">⚙️</span>
                   <span>Configure Settings</span>
                 </Button>

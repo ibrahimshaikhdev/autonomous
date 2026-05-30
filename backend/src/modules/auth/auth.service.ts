@@ -139,7 +139,7 @@ export class AuthService {
 
     // Send OTP via Resend
     try {
-      await this.resend.emails.send({
+      const { data, error } = await this.resend.emails.send({
         from: "AutonomousOps <onboarding@resend.dev>",
         to: email,
         subject: "Your Password Reset Code",
@@ -154,6 +154,12 @@ export class AuthService {
           </div>
         `,
       });
+
+      if (error) {
+        console.error("Resend API error:", JSON.stringify(error));
+      } else {
+        console.log("Email sent successfully, ID:", data?.id);
+      }
     } catch (error) {
       console.error("Failed to send email via Resend:", error);
     }

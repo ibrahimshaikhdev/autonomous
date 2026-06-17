@@ -1,4 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AutonomousOps AI
+
+AutonomousOps AI is an AI-native workflow automation platform inspired by n8n, Zapier, Retool, and AI operational systems. It allows users to visually build workflows, configure automation nodes, execute workflows, integrate external services, and manage automations through a scalable SaaS architecture. The long-term vision is to build an open-source AI workflow orchestration platform capable of AI-generated automations and intelligent operational workflows.
+LIVE at https://autonomous-4.vercel.app/
+## Current Architecture Status
+
+The project is a functional full-stack SaaS application with a frontend, backend, database, authentication, workflow persistence, execution engine, configurable runtime nodes, draft autosave, and an OTP password reset system.
+
+## Current Tech Stack
+
+### Frontend
+
+- Next.js 14
+- React 18
+- TypeScript
+- TailwindCSS
+- React Flow
+- shadcn/ui
+
+### Backend
+
+- NestJS
+- TypeScript
+- REST APIs
+
+### Database
+
+- MySQL
+- Prisma ORM
+
+### Authentication & Security
+
+- JWT authentication
+- Protected routes
+- Session persistence
+- User isolation/security
+- OTP password reset
+- Resend email API
+
+### Workflow Runtime
+
+- Workflow execution engine
+- Sequential graph traversal
+- Configurable execution nodes
+- Runtime execution logs
+- Draft autosave using localStorage
 
 ## Getting Started
 

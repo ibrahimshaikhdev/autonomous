@@ -9,6 +9,7 @@ async function bootstrap() {
   const allowedOrigins = [
     "http://localhost:3000",
     "https://autonomous-rho.vercel.app",
+    "https://autonomous-4.vercel.app",
   ];
 
   app.enableCors({
